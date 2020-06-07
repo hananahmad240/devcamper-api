@@ -5,7 +5,8 @@
 exports.getAllBootcamps = (req, res, next) => {
     res.status(200).json({
         success: true,
-        msg: "All bootcamps"
+        msg: "All bootcamps",
+        name: req.name
     })
 }
 
