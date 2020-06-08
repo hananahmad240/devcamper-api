@@ -2,6 +2,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const connectDB = require('./config/db');
+const colors = require('colors');
 dotenv.config();
 
 // crete app
@@ -17,8 +19,23 @@ if (process.env.NODE_ENV === 'development') {
 	app.use(require('./middleware/logger'));
 }
 
+// database
+connectDB();
+
 // express all routes
 app.use('/api/v1', require('./routes/bootcamp'));
 // create port
 const PORT = process.env.PORT;
-app.listen(PORT, () => console.log(`app is running on localhost:${PORT}`));
+
+const server = app.listen(PORT, () =>
+	console.log(`app is running on localhost:${PORT}`.yellow.bold)
+);
+
+// if mongodb wrong password error is come
+
+process.on('unhandledRejection', (err, promise) => {
+	console.log(`Error: ${err.message}`.red);
+	server.close(() => {
+		process.exit(1);
+	});
+});
