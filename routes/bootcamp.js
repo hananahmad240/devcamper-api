@@ -4,20 +4,37 @@ const {
     getSingBootcamps,
     updateBootcamps,
     deleteBootcamps,
-    addBootcamps
+    addBootcamps,
+    getBootcampsInRadius,
+    bootcampPhoyoUpload
 } = require('../controllers/bootcamps');
+const courseRouter = require('./courses');
+const reviewsRouter = require('./reviews');
 
+
+const Bootcamp = require('../models/Bootcampmodel');
+const {
+    protect,
+    authorize
+} = require('../middleware/auth');
 
 // creat route
 const router = express.Router();
 
-router.route('/bootcamps').get(getAllBootcamps); //get all
-router.route('/bootcamps/:id').get(getSingBootcamps); // get single
-router.route('/bootcamps/:id').put(updateBootcamps); // update single
-router.route('/bootcamps/:id').delete(deleteBootcamps); // delete single
-router.route('/bootcamps').post(addBootcamps); // add new
+// use other routers
+router.use('/:bootcampId/courses', courseRouter);
+router.use('/:bootcampId/reviews', reviewsRouter);
 
 
+router.route('/').get(getAllBootcamps); //get all
+router.route('/:id').get(getSingBootcamps); // get single
+router.route('/:id').put(protect, authorize('admin', 'publisher'), updateBootcamps); // update single
+router.route('/:id').delete(protect, authorize('admin', 'publisher'), deleteBootcamps); // delete single
+router.route('/').post(protect, authorize('admin', 'publisher'), addBootcamps); // add new
+router.route('/radius/:zipcode/:distance/:unit?').get(getBootcampsInRadius); // unit is km or mi
+
+// photo upload
+router.route('/:id/photo').put(protect, authorize('admin', 'publisher'), bootcampPhoyoUpload);
 
 
 // // get all bootcamp
